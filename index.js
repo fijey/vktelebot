@@ -1,5 +1,5 @@
 const express = require("express");
-const { handler } = require("./controller");
+const { handler } = require("./src/bot");
 const PORT = process.env.PORT || 4040;
 
 const app = express();
