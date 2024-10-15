@@ -1,3 +1,4 @@
+const MY_TOKEN = '6441533677:AAF3pEqjACs50ikwVIK3ceNBERhqMOEM3HI';
 
 const WEDDING_INVITATION_SCENE_ID = 'CREATE_WEDDING_INVITATION';
 const MUSIC_SCENE_ID = 'MUSIC_SCENE';
@@ -12,18 +13,13 @@ const CONFIRM_INVITATION_ACTION = 'confirm_invitation';
 const CREATE_AGAIN_WITH_TEMPLATE = 'create_again';
 
 const TEMPLATE_FORM_SAKINAH = `
-Form Data Undangan Paket Sakinah
+Form Data Undangan Digital
 
 Harap diisi dan diperiksa dengan baik sebelum diserahkan kepada kami, guna menghindari kesalahan ejaan dan sebagainya.
 
-Email:
-Phone:
-Subdomain:
-
-Link yang akan digunakan: nama link (.visualkreatif.com)
-Contoh link: .visualkreatif.com
-
-Link Anda:
+Email=>
+Phone=>
+Subdomain=>
 
 Data Diri Mempelai Pria
 Nama Lengkap=> 
@@ -31,41 +27,42 @@ Nama Panggilan=>
 Nama Ayah=>
 Nama Ibu=>
 Social Media Pria (Opsional)
-Instagram Pria=>
-Facebook Pria=>
-Twitter Pria=>
+Instagram=>
+Facebook=>
+Twitter=>
 
 Data Diri Mempelai Wanita
 Nama Lengkap=> 
 Nama Panggilan=>
 Nama Ayah=>
 Nama Ibu=>
-Social Media Wanita (Opsional)
-Instagram Wanita=>
-Facebook Wanita=>
-Twitter Wanita=>
+Social Media (Opsional)
+Instagram=>
+Facebook=>
+Twitter=>
 
 Detail Acara Akad
-Tanggal Akad=>
-Jam Mulai Akad=>
-Jam Selesai Akad=>
-Lokasi Akad=>
-Google Maps Akad=>
-Zona Waktu Akad=>
+Tanggal=>
+Jam Mulai=>
+Jam Selesai=>
+Lokasi=>
+Google Maps=>
+Zona Waktu=>
 
 Detail Acara Resepsi
-Tanggal Resepsi=>
-Jam Mulai Resepsi=>
-Jam Selesai Resepsi=>
-Lokasi Resepsi=>
-Google Maps Resepsi=>
-Zona Waktu Resepsi=>
+Tanggal=>
+Jam Mulai=>
+Jam Selesai=>
+Lokasi=>
+Google Maps=>
+Zona Waktu=>
 
 Untuk Foto Galeri bisa dikirim via whatsapp document
 Setelah kamu kirim semua data, maka selanjutnya Pesanan Undangan Digital kamu akan masuk tahap pembuatan/produksi. Lamanya tahapan pembuatan/produksi maksimal 1x24 jam. Mohon ditunggu yah.
 `;
 
 module.exports = {
+    MY_TOKEN,
     WEDDING_INVITATION_SCENE_ID,
     SAKINAH_ACTION,
     MAWADAH_ACTION,

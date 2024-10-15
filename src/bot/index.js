@@ -1,8 +1,7 @@
 const { Telegraf, Scenes, session } = require('telegraf');
 const weddingInvitationScene = require('./scenes/WeddingInvitationScene');
 const { isSessionExpired, resetSession } = require('../utils/session');
-const {WEDDING_INVITATION_SCENE_ID, TEMPLATE_FORM} = require('../utils/const');
-const MY_TOKEN = "6441533677:AAF3pEqjACs50ikwVIK3ceNBERhqMOEM3HI";
+const {MY_TOKEN, WEDDING_INVITATION_SCENE_ID, TEMPLATE_FORM} = require('../utils/const');
 
 const bot = new Telegraf(MY_TOKEN);
 const stage = new Scenes.Stage([weddingInvitationScene]);

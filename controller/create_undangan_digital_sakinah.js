@@ -1,60 +1,90 @@
-const { getAxiosInstance } = require("../src/utils/axios");
-const { errorHandler } = require("../src/utils/helper");
-const axios = require('axios');
-
-const MY_TOKEN = "6441533677:AAF3pEqjACs50ikwVIK3ceNBERhqMOEM3HI";
-const BASE_URL = `https://api.telegram.org/bot${MY_TOKEN}`;
-const axiosInstance = getAxiosInstance(BASE_URL);
-
 const {
   CONFIRM_INVITATION_ACTION,
   CREATE_AGAIN_WITH_TEMPLATE
 } = require('../src/utils/const');
-const { Markup } = require("telegraf");
+const { Markup } = require('telegraf');
+const axios = require('axios');
 
 async function confirmUndanganSakinahHandler(chatId, username, incomingMessages, ctx) {
   try {
+    const dataUndangan = parseIncomingMessages(incomingMessages);
+    ctx.session.data.invitation = dataUndangan;
 
-    const messageLines = incomingMessages.split('\n');
+    await sendConfirmationMessage(ctx, dataUndangan);
+  } catch (error) {
+    console.error("Error dalam memproses data undangan:", error);
+  }
+}
 
-    // Membuat objek untuk menyimpan variabel
-    const dataUndangan = {};
+function parseIncomingMessages(incomingMessages) {
+  const messageLines = incomingMessages.split('\n');
+  const dataUndangan = {};
+  let currentSection = '';
 
-    // Mengambil data dari setiap baris
-    for (const line of messageLines) {
-      const [label, value] = line.split('=>');
-      if (label && value) {
-        // Menghapus spasi di awal dan akhir value
-        const trimmedValue = value.trim();
-        const key = label.trim().replace(/ /g, '_').toString().toLowerCase(); // Replace spaces with underscores in the label
+  for (const line of messageLines) {
+    const trimmedLine = line.trim();
 
-        if (dataUndangan) {
-          if (dataUndangan[key]) {
-            dataUndangan[`${key}_wanita`] = trimmedValue;
-          } else {
-            dataUndangan[key] = trimmedValue;
-          }
-        }
+    if (trimmedLine.startsWith('Data Diri Mempelai')) {
+      currentSection = trimmedLine.includes('Pria') ? 'pria' : 'wanita';
+      continue;
+    }
+
+    if (trimmedLine.startsWith('Detail Acara')) {
+      currentSection = trimmedLine.includes('Akad') ? 'akad' : 'resepsi';
+      continue;
+    }
+
+    const [label, value] = trimmedLine.split('=>').map(item => item.trim());
+    if (label && value) {
+      let key = label.replace(/ /g, '_').toLowerCase();
+
+      if (currentSection) {
+        key = `${key}_${currentSection}`;
+        console.log(key);
       }
 
+      dataUndangan[key] = value;
     }
-    ctx.session.data.invitation = dataUndangan;
-    const invitationData = ctx.session.data.invitation;
-    await ctx.reply(`
+  }
+
+  return setDefaultValues(dataUndangan);
+}
+
+function setDefaultValues(dataUndangan) {
+  const defaultFields = [
+    'email', 'phone', 'subdomain', 'link_anda',
+    'nama_lengkap_pria', 'nama_panggilan_pria', 'nama_ayah_pria', 'nama_ibu_pria',
+    'instagram_pria', 'facebook_pria', 'twitter_pria',
+    'nama_lengkap_wanita', 'nama_panggilan_wanita', 'nama_ayah_wanita', 'nama_ibu_wanita',
+    'instagram_wanita', 'facebook_wanita', 'twitter_wanita',
+    'tanggal_akad', 'jam_mulai_akad', 'jam_selesai_akad', 'lokasi_akad', 'google_maps_akad', 'zona_waktu_akad',
+    'tanggal_resepsi', 'jam_mulai_resepsi', 'jam_selesai_resepsi', 'lokasi_resepsi', 'google_maps_resepsi', 'zona_waktu_resepsi'
+  ];
+
+  defaultFields.forEach(field => {
+    if (!dataUndangan[field]) {
+      dataUndangan[field] = 'Tidak diisi';
+    }
+  });
+
+  return dataUndangan;
+}
+
+async function sendConfirmationMessage(ctx, invitationData) {
+  const message = `
 KONFIRMASI DATA UNDANGAN
 Harap periksa dengan teliti data-data yang kamu masukan dibawah, silahkan konfirmasi jika sudah sesuai.
 
-Link yang akan digunakan : ${invitationData.link_yang_akan_digunakan}
 Email : ${invitationData.email}
 Phone : ${invitationData.phone}
 Subdomain : ${invitationData.subdomain}
 
 Data Pengantin Pria
-Nama Lengkap : ${invitationData.nama_lengkap}
-Nama Panggilan : ${invitationData.nama_panggilan}
-Nama Ayah : ${invitationData.nama_ayah}
-Nama Ibu : ${invitationData.nama_ibu}
-Intagram : ${invitationData.instagram_pria}
+Nama Lengkap : ${invitationData.nama_lengkap_pria}
+Nama Panggilan : ${invitationData.nama_panggilan_pria}
+Nama Ayah : ${invitationData.nama_ayah_pria}
+Nama Ibu : ${invitationData.nama_ibu_pria}
+Instagram : ${invitationData.instagram_pria}
 Facebook : ${invitationData.facebook_pria}
 Twitter : ${invitationData.twitter_pria}
 
@@ -63,33 +93,32 @@ Nama Lengkap : ${invitationData.nama_lengkap_wanita}
 Nama Panggilan : ${invitationData.nama_panggilan_wanita}
 Nama Ayah : ${invitationData.nama_ayah_wanita}
 Nama Ibu : ${invitationData.nama_ibu_wanita}
-Intagram : ${invitationData.instagram_wanita}
+Instagram : ${invitationData.instagram_wanita}
 Facebook : ${invitationData.facebook_wanita}
 Twitter : ${invitationData.twitter_wanita}
 
 Data Akad
 Tanggal: ${invitationData.tanggal_akad}
-Dilaksanakan Pada: ${invitationData.jam_mulai_akad} - ${invitationData.jam_selesai_akad} ${invitationData.zona_waktu_akad}
+Dilaksanakan Pada: ${invitationData.jam_mulai_akad} - ${invitationData.jam_selesai_akad}
+Zona Waktu: ${invitationData.zona_waktu_akad}
 Lokasi: ${invitationData.lokasi_akad}
 Google Maps Akad: ${invitationData.google_maps_akad}
 
 Data Resepsi
 Tanggal: ${invitationData.tanggal_resepsi}
-Dilaksanakan Pada: ${invitationData.jam_mulai_resepsi} - ${invitationData.jam_selesai_resepsi} ${invitationData.zona_waktu_resepsi}
+Dilaksanakan Pada: ${invitationData.jam_mulai_resepsi} - ${invitationData.jam_selesai_resepsi}
+Zona Waktu: ${invitationData.zona_waktu_resepsi}
 Lokasi: ${invitationData.lokasi_resepsi}
 Google Maps Resepsi: ${invitationData.google_maps_resepsi}
+`;
 
-`, Markup.keyboard([[CONFIRM_INVITATION_ACTION, CREATE_AGAIN_WITH_TEMPLATE]]));
-
-  } catch (error) {
-    console.log("Error fetching welcome data:", error);
-  }
+  await ctx.reply(message, Markup.keyboard([[CONFIRM_INVITATION_ACTION, CREATE_AGAIN_WITH_TEMPLATE]]));
 }
 
 async function createUndanganSakinahHandler(chatId, username, incomingMessages, ctx) {
   try {
     const dataUndangan = ctx.session.data.invitation;
-    const apiUrl = 'http://visualkreatif.test/api/partner/create-undangan-sakinah-handler/' + username;
+    const apiUrl = `http://visualkreatif.test/api/partner/create-undangan-sakinah-handler/${username}`;
 
     const config = {
       headers: {
@@ -97,26 +126,27 @@ async function createUndanganSakinahHandler(chatId, username, incomingMessages, 
       },
     };
 
-    axios.post(apiUrl, dataUndangan, config)
-      .then(async (response) => {
-        // Tangani respons dari server di sini
-        console.log("response dari server", response.data);
-        let email = response.data.data.email;
-        let password = response.data.data.password;
-        let type = response.data.data.type;
-
-        await ctx.reply(`Akun Berhasil Dibuat\nSilahkan login dengan credential berikut untuk melengkapi data\nemail:${email}\npassword:${password}\ntype:${type}`);
-
-      })
-      .catch(async (error) => {
-        // Tangani kesalahan jika ada
-        console.log(error);
-        await ctx.reply(`Tidak dapat diproses, silahkan hubungi admin`);
-      });
+    try {
+      const response = await axios.post(apiUrl, dataUndangan, config);
+      handleSuccessResponse(response, ctx);
+    } catch (error) {
+      handleErrorResponse(error, ctx);
+    }
 
   } catch (error) {
-    console.log("Error fetching welcome data:", error);
+    console.error("Error fetching welcome data:", error);
   }
+}
+
+async function handleSuccessResponse(response, ctx) {
+  const { email, password, type } = response.data.data;
+  const message = `Akun Berhasil Dibuat\nSilahkan login dengan credential berikut untuk melengkapi data\nemail:${email}\npassword:${password}\ntype:${type}`;
+  await ctx.reply(message);
+}
+
+async function handleErrorResponse(error, ctx) {
+  console.error("Error during API request:", error);
+  await ctx.reply(`Tidak dapat diproses, silahkan hubungi admin`);
 }
 
 module.exports = {
