@@ -13,7 +13,7 @@ class WeddingInvitationController {
       await ctx.reply(confirmationMessage, Markup.keyboard([[CONFIRM_INVITATION_ACTION, CREATE_AGAIN_WITH_TEMPLATE]]));
     } catch (error) {
       console.error("Error dalam memproses data undangan:", error);
-      ctx.reply('Terjadi kesalahan saat memproses data undangan. Silakan coba lagi.');
+      ctx.reply(error.message || 'Terjadi kesalahan saat memproses data undangan. Silakan coba lagi.');
     }
   }
 

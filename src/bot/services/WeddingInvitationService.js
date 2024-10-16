@@ -6,36 +6,52 @@ class WeddingInvitationService {
   }
 
 async parseIncomingMessages(incomingMessages) {
-    const messageLines = incomingMessages.split('\n');
-    const dataUndangan = {};
-    let currentSection = '';
+  const messageLines = incomingMessages.split('\n');
+  const dataUndangan = {};
+  let currentSection = '';
+  const requiredFields = [
+    'email', 'subdomain',
+    'nama_lengkap_pria', 'nama_panggilan_pria', 'nama_ayah_pria', 'nama_ibu_pria',
+    'nama_lengkap_wanita', 'nama_panggilan_wanita', 'nama_ayah_wanita', 'nama_ibu_wanita',
+    'tanggal_akad', 'jam_mulai_akad', 'jam_selesai_akad', 'lokasi_akad', 'google_maps_akad', 'zona_waktu_akad',
+    'tanggal_resepsi', 'jam_mulai_resepsi', 'jam_selesai_resepsi', 'lokasi_resepsi', 'google_maps_resepsi', 'zona_waktu_resepsi'
+  ];
 
-    for (const line of messageLines) {
-    const trimmedLine = line.trim();
-
-    if (trimmedLine.startsWith('Data Diri Mempelai')) {
-        currentSection = trimmedLine.includes('Pria') ? 'pria' : 'wanita';
-        continue;
-    }
-
-    if (trimmedLine.startsWith('Detail Acara')) {
-        currentSection = trimmedLine.includes('Akad') ? 'akad' : 'resepsi';
-        continue;
-    }
-
-    const [label, value] = trimmedLine.split('=>').map(item => item.trim());
-    if (label && value) {
-        let key = label.replace(/ /g, '_').toLowerCase();
-
-        if (currentSection) {
+  for (const line of messageLines) {
+    if (line.includes('=>')) {
+      let [key, value] = line.split('=>').map(item => item.trim());
+      key = key.toLowerCase().replace(/ /g, '_');
+      
+      if (currentSection) {
         key = `${key}_${currentSection}`;
-        }
-
+      }
+      
+      if (value) {
         dataUndangan[key] = value;
+      }
+    } else if (line.trim() !== '') {
+      currentSection = line.trim().toLowerCase().replace(/ /g, '_');
+      if (currentSection === 'data_diri_mempelai_pria') {
+        currentSection = 'pria';
+      } else if (currentSection === 'data_diri_mempelai_wanita') {
+        currentSection = 'wanita';
+      } else if (currentSection.includes('akad')) {
+        currentSection = 'akad';
+      } else if (currentSection.includes('resepsi')) {
+        currentSection = 'resepsi';
+      } else {
+        currentSection = '';
+      }
     }
-    }
+  }
 
-    return this.setDefaultValues(dataUndangan);
+  const missingFields = requiredFields.filter(field => !dataUndangan[field]);
+  
+  if (missingFields.length > 0) {
+    throw new Error(`Mohon lengkapi semua field yang diperlukan. Field yang belum diisi: ${missingFields.join(', ')}`);
+  }
+
+  return dataUndangan;
 }
 
 async setDefaultValues(dataUndangan) {
