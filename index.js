@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Telegraf, Scenes, session, Markup } = require('telegraf');
+const { Telegraf, Scenes, session } = require('telegraf');
 const weddingInvitationScene = require('./src/bot/scenes/WeddingInvitationScene');
 const { WEDDING_INVITATION_SCENE_ID } = require('./src/utils/const');
 const musicScene = require('./src/bot/scenes/MusicScene');
@@ -12,39 +12,39 @@ const stage = new Scenes.Stage([weddingInvitationScene, musicScene]);
 bot.use(session());
 // Middleware to set default session structure
 bot.use((ctx, next) => {
-    // Ensure ctx.session is defined
-    ctx.session = ctx.session || {};
+	// Ensure ctx.session is defined
+	ctx.session = ctx.session || {};
 
-    // Check if ctx.session.data is undefined or null
-    if (!ctx.session.data) {
-        // Set default structure
-        ctx.session.data = {
-            preferenceType: null,
-            inputType: null,
-        };
-        ctx.session.startTime = Date.now();
-        ctx.session.__scenes = {current: '',state: {}}
-        // Additional logic to set other default session data if needed
-    }
+	// Check if ctx.session.data is undefined or null
+	if (!ctx.session.data) {
+		// Set default structure
+		ctx.session.data = {
+			preferenceType: null,
+			inputType: null,
+		};
+		ctx.session.startTime = Date.now();
+		ctx.session.__scenes = {current: '',state: {}};
+		// Additional logic to set other default session data if needed
+	}
 
-    // Call the next middleware or handler
-    return next();
+	// Call the next middleware or handler
+	return next();
 });
 bot.use(isExpiredSessionMiddleware);
 bot.use(stage.middleware());
 
 bot.start((ctx) => {
-    ctx.reply('Welcome!'); // Handle start command or initial message
+	ctx.reply('Welcome!'); // Handle start command or initial message
 });
 
 bot.on('text', (ctx) => {
-    const messageText = ctx.message.text.toLowerCase();
-    if (messageText === '/create_wedding_invitation') {
-        ctx.scene.enter(WEDDING_INVITATION_SCENE_ID);
-    }
+	const messageText = ctx.message.text.toLowerCase();
+	if (messageText === '/create_wedding_invitation') {
+		ctx.scene.enter(WEDDING_INVITATION_SCENE_ID);
+	}
 });
 
 bot.launch();
 
-process.once("SIGINT", () => bot.stop("SIGINT"));
-process.once("SIGTERM", () => bot.stop("SIGTERM"));
+process.once('SIGINT', () => bot.stop('SIGINT'));
+process.once('SIGTERM', () => bot.stop('SIGTERM'));
