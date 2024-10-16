@@ -9,19 +9,11 @@ const {
   CREATE_AGAIN_WITH_TEMPLATE,
   MUSIC_SCENE_ID,
 } = require('../../utils/const');
-
-const {
-  confirmUndanganSakinahHandler
-} = require('../../../controller/create_undangan_digital_sakinah');
+const WeddingInvitationController = require('../../../controller/WeddingInvitationController');
 
 const weddingInvitationScene = new Scenes.BaseScene(WEDDING_INVITATION_SCENE_ID);
 
 weddingInvitationScene.enter((ctx) => {
-  // ctx.session.data = { preferenceType: MAWADA H_ACTION };
-  // ctx.reply('Bagaimana Kamu Akan Memasukan Data?', 
-  //   Markup.keyboard([[MANUAL_INPUT, TEMPLATE_FORM]])
-  // );
-
   handleTemplateForm(ctx);
 });
 
@@ -43,8 +35,6 @@ weddingInvitationScene.on('text', async (ctx) => {
     handleDefaultCase(ctx, choiceLowercase);
   }
 });
-
-// ... fungsi-fungsi handler ...
 
 function handleManualInput(ctx) {
   ctx.session.data = { inputType: MANUAL_INPUT };
@@ -70,7 +60,7 @@ function handleDefaultCase(ctx, choiceLowercase) {
     ctx.session.data?.inputType === TEMPLATE_FORM;
 
   if (isMawadahCondition) {
-    confirmUndanganSakinahHandler(ctx.message.chat.id, ctx.message.chat.username, ctx.message.text, ctx);
+    WeddingInvitationController.confirmUndanganSakinah(ctx);
   } else {
     ctx.reply('Pilihan tidak valid. Silakan gunakan tombol yang disediakan.');
   }

@@ -6,7 +6,7 @@ const {
 } = require('../../utils/const');
 
 const { getListMusicHandler } = require('../../../controller/music_controller');
-const { createUndanganSakinahHandler } = require('../../../controller/create_undangan_digital_sakinah');
+const WeddingInvitationController = require('../../../controller/WeddingInvitationController');
 
 
 const musicScene = new Scenes.BaseScene(MUSIC_SCENE_ID);
@@ -44,8 +44,7 @@ musicScene.on('text', async (ctx) => {
     case 'YA':
       const username = ctx.message.chat.username;
       ctx.reply(`Mohon Tunggu Sedang Kami Proses\nMenginputkan Data Pengantin : loading"`, Markup.removeKeyboard());
-      await createUndanganSakinahHandler(ctx.message.chat.id,ctx.message.chat.username,ctx.message.text,ctx);
-      console.log(ctx.session);
+      await WeddingInvitationController.createUndanganSakinah(ctx);
       break;
     case 'TIDAK':
       ctx.reply('<b>Pilih Background Musik terlebih dahulu:</b>', {

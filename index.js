@@ -1,10 +1,12 @@
+require('dotenv').config();
 const { Telegraf, Scenes, session, Markup } = require('telegraf');
 const weddingInvitationScene = require('./src/bot/scenes/WeddingInvitationScene');
-const { MY_TOKEN, WEDDING_INVITATION_SCENE_ID, MUSIC_SCENE_ID } = require('./src/utils/const');
+const { WEDDING_INVITATION_SCENE_ID } = require('./src/utils/const');
 const musicScene = require('./src/bot/scenes/MusicScene');
 
+
 const { isExpiredSessionMiddleware } = require('./src/bot/middleware/sessionMiddleware');
-const bot = new Telegraf(MY_TOKEN, { polling: { port: 8080 } });
+const bot = new Telegraf(process.env.BOT_TOKEN, { polling: { port: 8080 } });
 const stage = new Scenes.Stage([weddingInvitationScene, musicScene]);
 
 bot.use(session());

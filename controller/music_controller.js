@@ -8,7 +8,7 @@ const axios = require('axios');
 async function getListMusicHandler(username, ctx) {
 let listMusic = [];
   try {
-    const apiUrl = 'http://visualkreatif.test/api/partner/get-list-music/' + username;
+    const apiUrl = `${process.env.API_BASE_URL}/partner/get-list-music/${username}`;
     const dataUndangan = [];
 
     const config = {
